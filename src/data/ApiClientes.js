@@ -29,9 +29,9 @@ export const createCliente = async (datos)=>{
     }
 }
 
-export const updateCliente = async (datos)=>{
+export const updateCliente = async (id,datos)=>{
     try {
-        const url = import.meta.env.VITE_URL_API+'/clientes'
+        const url = import.meta.env.VITE_URL_API+'/clientes/'+id
         const request = await fetch(url,{
             method:'put',
             body: JSON.stringify(datos),
@@ -46,6 +46,18 @@ export const updateCliente = async (datos)=>{
     }
 }
 
-export const deleteCliente = async ()=>{
-
+export const deleteCliente = async (id)=>{
+    try {
+        const url = import.meta.env.VITE_URL_API+'/clientes/'+id
+        const request = await fetch(url,{
+            method:'delete',
+            headers:{
+                'Content-Type': 'application/json'
+            }
+        })
+        const response = await request.json()
+        return response
+    } catch (error) {
+        console.log(error);
+    }
 }

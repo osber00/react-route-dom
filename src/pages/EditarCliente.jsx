@@ -3,9 +3,11 @@ import {
   useActionData,
   useNavigate,
   Form,
+  redirect
 } from "react-router-dom";
-import { getCliente } from "../data/ApiClientes";
+import { getCliente, updateCliente } from "../data/ApiClientes";
 import Formulario from "../components/Formulario";
+import Error from "../components/Error";
 
 export const editarClienteLoader = async ({ params }) => {
   //console.log(params.clienteId);
@@ -19,12 +21,13 @@ export const editarClienteLoader = async ({ params }) => {
   return cliente;
 };
 
-export const editarClienteAction = async ({ request }) => {
+export const editarClienteAction = async ({ request, params }) => {
   const formData = await request.formData();
-  console.log(formData);
+  //console.log([...formData]);
   const datos = Object.fromEntries(formData);
   const email = formData.get("email");
-  console.log(datos);
+  //console.log(datos);
+  //console.log(params);
   const errores = [];
   if (Object.values(datos).includes("")) {
     errores.push("Todos los campos son obligatorios");
@@ -41,16 +44,20 @@ export const editarClienteAction = async ({ request }) => {
     return errores;
   }
 
-  /* Guardar los cambios del registro */
+  const guardarCambios = await updateCliente(params.clienteId, datos)
+  if (Object.keys(guardarCambios).length > 0) {
+    return redirect('/')
+  }
 
-  return {};
+  errores.push('No se guardaron los cambios')
+  return errores;
 };
 
 const EditarCliente = () => {
   const cliente = useLoaderData();
   const navigate = useNavigate();
+  const errores = useActionData()
   //console.log(cliente);
-  const { id, nombre, email, telefono, empresa, nota } = cliente;
   return (
     <>
       <div className='mb-6'>
@@ -65,12 +72,12 @@ const EditarCliente = () => {
       </div>
       <div className='bg-white py-6 px-6 rounded-md'>
         <Form method='post' noValidate>
-          {/* {errores?.length &&
-            errores.map((error, i) => <Error key={i}>{error}</Error>)} */}
+          {errores?.length &&
+            errores.map((error, i) => <Error key={i}>{error}</Error>)}
           <Formulario cliente={cliente}></Formulario>
           <button
             type='submit'
-            className='bg-blue-700 w-full text-white font-semibold py-4 uppercase rounded-md hover:bg-blue-600'>
+            className='bg-red-700 w-full text-white font-semibold py-4 uppercase rounded-md hover:bg-blue-600'>
             <i className='fa fa-save' /> Guardar cambios
           </button>
         </Form>
